@@ -44,7 +44,7 @@ Resolution width of your display. Defaults to `3840`.
 
 ### --height
 
-Resolution height of your display. Defaults to `2160`,
+Resolution height of your display. Defaults to `2160`.
 
 ### --variance
 
