@@ -28,5 +28,8 @@ import fs from 'fs';
 
 	fs.writeFile(wallpaperFile, buffer, async () => {
 		await wallpaper.set(wallpaperFile);
+		console.log(
+			`Wallpaper generated & set with screenWidth: ${screenWidth}, screenHeight: ${screenHeight}, variance: ${variance} & cellSize: ${cellSize}.`
+		);
 	});
 })();
