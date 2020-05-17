@@ -1,6 +1,6 @@
 {
 	"name": "wallangle",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"description": "A CLI utility to set algorithmically generated triangle art as your desktop wallpaper/background.",
 	"repository": "https://github.com/MarcelMichau/wallangle",
 	"author": {

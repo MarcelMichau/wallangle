@@ -6,30 +6,37 @@ import wallpaper from 'wallpaper';
 import fs from 'fs';
 
 (async () => {
-	const screenWidth = parseArgs(process.argv.slice(2)).width || 3840;
-	const screenHeight = parseArgs(process.argv.slice(2)).height || 2160;
-	const variance = parseArgs(process.argv.slice(2)).variance || Math.random();
-	const cellSize =
-		parseArgs(process.argv.slice(2)).cellSize || Math.random() * 200 + 40;
+	const parsedArgs = parseArgs(process.argv.slice(2));
+
+	const screenWidth = parsedArgs.width ?? 3840;
+	const screenHeight = parsedArgs.height ?? 2160;
+	const variance = parsedArgs.variance ?? Math.random();
+	const cellSize = parsedArgs.cellSize ?? Math.random() * 200 + 40;
+	const seed = parsedArgs.seed ?? null;
+	const colors = parsedArgs?.colors.split(',') ?? 'random';
 
 	const pngURI = Trianglify({
 		width: screenWidth,
 		height: screenHeight,
 		cell_size: cellSize,
-		x_colors: 'random',
+		x_colors: colors,
+		y_colors: 'match_x',
 		variance,
+		seed,
 	}).png();
 
 	const data = pngURI.substr(pngURI.indexOf('base64') + 7);
 
 	const buffer = new Buffer.from(data, 'base64');
 
-	const wallpaperFile = 'wallpaper.png';
+	const wallpaperFileName = 'wallpaper.png';
 
-	fs.writeFile(wallpaperFile, buffer, async () => {
-		await wallpaper.set(wallpaperFile);
+	fs.writeFile(wallpaperFileName, buffer, async () => {
+		await wallpaper.set(wallpaperFileName);
 		console.log(
-			`Wallpaper generated & set with screenWidth: ${screenWidth}, screenHeight: ${screenHeight}, variance: ${variance} & cellSize: ${cellSize}.`
+			`Wallpaper generated & set with screenWidth: ${screenWidth}, screenHeight: ${screenHeight}, variance: ${variance}, cellSize: ${cellSize}, seed: ${seed} & colors: ${colors.join(
+				','
+			)}.`
 		);
 	});
 })();
