@@ -8,7 +8,7 @@ A CLI utility to set algorithmically generated triangle art as your desktop wall
 
 ---
 
-Uses the awesome [Trianglify](https://github.com/qrohlf/trianglify) to randomly generate a low-poly desktop wallpaper:
+Uses the awesome [Trianglify](https://github.com/qrohlf/trianglify) to randomly generate a low-poly triangle art desktop wallpaper:
 
 ![Preview Image](images/example.png 'Preview Image')
 
@@ -21,8 +21,6 @@ $ npm install -g wallangle
 ```
 
 ## Usage
-
----
 
 ### Defaults
 
