@@ -11,7 +11,7 @@ import fs from 'fs';
 	const screenWidth = parsedArgs.width ?? 3840;
 	const screenHeight = parsedArgs.height ?? 2160;
 	const variance = parsedArgs.variance ?? Math.random();
-	const cellSize = parsedArgs.cellSize ?? Math.random() * 200 + 40;
+	const cellSize = parsedArgs.cellSize ?? Math.floor(Math.random() * 200 + 40);
 	const seed = parsedArgs.seed ?? null;
 	const colors = parsedArgs?.colors.split(',') ?? 'random';
 

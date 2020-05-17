@@ -52,7 +52,7 @@ Decimal value between 0 and 1 (inclusive), defaults to `Math.random()`. Specify 
 
 ### --cellSize
 
-Integer, defaults to `Math.random() * 200 + 40`. Specify the size of the mesh used to generate triangles. Larger values will result in coarser patterns, smaller values will result in finer patterns. Note that very small values may dramatically increase the runtime of Trianglify.
+Integer, defaults to `Math.floor(Math.random() * 200 + 40)`. Specify the size of the mesh used to generate triangles. Larger values will result in coarser patterns, smaller values will result in finer patterns. Note that very small values may dramatically increase the runtime of Trianglify.
 
 ### --seed
 
