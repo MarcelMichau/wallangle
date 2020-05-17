@@ -1,0 +1,33 @@
+{
+	"name": "wallangle",
+	"version": "1.0.0",
+	"description": "A CLI utility to set algorithmically generated triangle art as your desktop wallpaper/background.",
+	"repository": "https://github.com/MarcelMichau/wallangle",
+	"author": {
+		"name": "Marcel Michau",
+		"email": "marcelmichau@gmail.com",
+		"url": "https://marcelmichau.dev"
+	},
+	"bin": {
+		"wallangle": "cli.mjs"
+	},
+	"main": "cli.mjs",
+	"files": [
+		"cli.mjs"
+	],
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [
+		"wallpaper",
+		"background",
+		"procedural",
+		"triangles"
+	],
+	"license": "MIT",
+	"dependencies": {
+		"minimist": "^1.2.5",
+		"trianglify": "^3.0.0",
+		"wallpaper": "^4.4.1"
+	}
+}
