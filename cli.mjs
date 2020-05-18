@@ -13,7 +13,7 @@ import fs from 'fs';
 	const variance = parsedArgs.variance ?? Math.random();
 	const cellSize = parsedArgs.cellSize ?? Math.floor(Math.random() * 200 + 40);
 	const seed = parsedArgs.seed ?? null;
-	const colors = parsedArgs?.colors.split(',') ?? 'random';
+	const colors = parsedArgs.colors?.split(',') ?? 'random';
 
 	const pngURI = Trianglify({
 		width: screenWidth,
@@ -34,9 +34,9 @@ import fs from 'fs';
 	fs.writeFile(wallpaperFileName, buffer, async () => {
 		await wallpaper.set(wallpaperFileName);
 		console.log(
-			`Wallpaper generated & set with screenWidth: ${screenWidth}, screenHeight: ${screenHeight}, variance: ${variance}, cellSize: ${cellSize}, seed: ${seed} & colors: ${colors.join(
-				','
-			)}.`
+			`Wallpaper generated & set with screenWidth: ${screenWidth}, screenHeight: ${screenHeight}, variance: ${variance}, cellSize: ${cellSize}, seed: ${seed} & colors: ${
+				Array.isArray(colors) ? colors.join(',') : colors
+			}.`
 		);
 	});
 })();
