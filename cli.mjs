@@ -1,42 +1,15 @@
 #!/usr/bin/env node
 
-import parseArgs from 'minimist';
-import Trianglify from 'trianglify';
-import wallpaper from 'wallpaper';
-import fs from 'fs';
+// The real CLI is loaded dynamically: its static imports (e.g. zlib.crc32) fail with a cryptic
+// error on older Node versions, before any check inside it could run.
+import { MINIMUM_NODE_VERSION, isSupportedNodeVersion } from './lib/node-version.mjs';
 
-(async () => {
-	const parsedArgs = parseArgs(process.argv.slice(2));
-
-	const screenWidth = parsedArgs.width ?? 3840;
-	const screenHeight = parsedArgs.height ?? 2160;
-	const variance = parsedArgs.variance ?? Math.random();
-	const cellSize = parsedArgs.cellSize ?? Math.floor(Math.random() * 200 + 40);
-	const seed = parsedArgs.seed ?? null;
-	const colors = parsedArgs.colors?.split(',') ?? 'random';
-
-	const pngURI = Trianglify({
-		width: screenWidth,
-		height: screenHeight,
-		cell_size: cellSize,
-		x_colors: colors,
-		y_colors: 'match_x',
-		variance,
-		seed,
-	}).png();
-
-	const data = pngURI.substr(pngURI.indexOf('base64') + 7);
-
-	const buffer = new Buffer.from(data, 'base64');
-
-	const wallpaperFileName = 'wallpaper.png';
-
-	fs.writeFile(wallpaperFileName, buffer, async () => {
-		await wallpaper.set(wallpaperFileName);
-		console.log(
-			`Wallpaper generated & set with screenWidth: ${screenWidth}, screenHeight: ${screenHeight}, variance: ${variance}, cellSize: ${cellSize}, seed: ${seed} & colors: ${
-				Array.isArray(colors) ? colors.join(',') : colors
-			}.`
-		);
-	});
-})();
+if (isSupportedNodeVersion(process.versions.node)) {
+	import('./lib/main.mjs').then(({ run }) => run(process.argv.slice(2)));
+} else {
+	console.error(
+		'wallangle needs Node.js ' + MINIMUM_NODE_VERSION + ' or newer, but this is ' + process.version + '.\n' +
+			'Update Node.js from https://nodejs.org/ and try again.'
+	);
+	process.exitCode = 1;
+}

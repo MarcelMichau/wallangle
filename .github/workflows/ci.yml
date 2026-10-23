@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+        # The minimum version from package.json engines, the active LTS, and the current release.
+        node: ['22.2.0', 'lts/*', 'current']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  smoke:
+    # Exercises the real OS integration. Hosted runners may not expose a desktop the way a
+    # real machine does, so this is informational rather than a required check.
+    name: Monitor detection (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - name: List monitors
+        run: node --input-type=module -e "const p = await (await import('./lib/wallpaper/index.mjs')).loadPlatform(); console.log(await p.listMonitors());"
+
+  old-node:
+    # npx installs despite engines.node, so an unsupported Node must get a readable error.
+    name: Readable error on unsupported Node
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Run the CLI
+        run: |
+          if output="$(node cli.mjs --help 2>&1)"; then
+            echo "::error::Expected a non-zero exit code on Node $(node -v)"
+            exit 1
+          fi
+          echo "$output"
+          grep -q "wallangle needs Node.js" <<< "$output"
