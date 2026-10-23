@@ -16,6 +16,14 @@ Randomly generates a low-poly triangle art wallpaper for each of your monitors, 
 
 Requires [Node.js](https://nodejs.org/) >= 22.2, on Windows 10+ or macOS.
 
+Run it without installing:
+
+```
+$ npx wallangle@latest
+```
+
+Or install it globally:
+
 ```
 $ npm install -g wallangle
 ```
@@ -27,6 +35,8 @@ $ npm install -g wallangle
 ```
 $ wallangle
 ```
+
+With `npx`, put the flags after the package name, e.g. `npx wallangle@latest --colors=YlGnBu`.
 
 Every run prints the seed it used. Pass it back with `--seed` to recreate the same wallpapers.
 
