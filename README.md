@@ -8,13 +8,13 @@ A CLI utility to set algorithmically generated triangle art as your desktop wall
 
 ---
 
-Uses the awesome [Trianglify](https://github.com/qrohlf/trianglify) to randomly generate a low-poly triangle art desktop wallpaper:
+Randomly generates a low-poly triangle art wallpaper for each of your monitors, at each monitor's native resolution:
 
 ![Preview Image](images/example.png 'Preview Image')
 
 ## Install
 
-Requires [Node.js](https://nodejs.org/) >= 14.
+Requires [Node.js](https://nodejs.org/) >= 22.2, on Windows 10+ or macOS.
 
 ```
 $ npm install -g wallangle
@@ -28,42 +28,52 @@ $ npm install -g wallangle
 $ wallangle
 ```
 
+Every run prints the seed it used. Pass it back with `--seed` to recreate the same wallpapers.
+
 ### With Config
 
 ```
-$ wallangle --width=2560 --height=1440 --variance=0.75 --cellSize=250 --seed=helloworld --colors="#083d77,#ebebd3,#da4167,#f4d35e,#f78764"
+$ wallangle --variance=0.75 --cellSize=250 --seed=helloworld --colors="#083d77,#ebebd3,#da4167,#f4d35e,#f78764"
 ```
 
 ## Flags
 
-These flags set specific options for Trianglify:
+Flags apply to every monitor. Anything left unset is chosen randomly for each monitor, derived from the seed.
 
-### --width
+### --width / --height
 
-Resolution width of your display. Defaults to `3840`.
-
-### --height
-
-Resolution height of your display. Defaults to `2160`.
+Image size in pixels. Defaults to each monitor's resolution, so you normally won't need these.
 
 ### --variance
 
-Decimal value between 0 and 1 (inclusive), defaults to `Math.random()`. Specify the amount of randomness used when generating triangles.
+Decimal value between 0 and 1 (inclusive). Specify the amount of randomness used when generating triangles. 0 gives a regular grid.
 
 ### --cellSize
 
-Integer, defaults to `Math.floor(Math.random() * 200 + 40)`. Specify the size of the mesh used to generate triangles. Larger values will result in coarser patterns, smaller values will result in finer patterns. Note that very small values may dramatically increase the runtime of Trianglify.
+Integer, at least 10. Defaults to a random value between 40 and 239. Specify the size of the mesh used to generate triangles. Larger values will result in coarser patterns, smaller values will result in finer patterns.
 
 ### --seed
 
-Number or string, defaults to `null`. Seeds the random number generator to create repeatable patterns. When set to null, the random number will be seeded with random values from the environment.
+Any string or number. Seeds the random number generator to create repeatable patterns. Defaults to a random seed.
 
 ### --colors
 
-Comma-separated string of CSS-formatted colors. Defaults to `'random'`. You can use a tool such as [Coolors](https://coolors.co/) to generate color palettes. Example is `--colors="#083d77,#ebebd3,#da4167,#f4d35e,#f78764"`
+One of:
+
+- A comma-separated list of CSS colours, e.g. `--colors="#083d77,#ebebd3,#da4167,#f4d35e,#f78764"`. You can use a tool such as [Coolors](https://coolors.co/) to generate palettes.
+- The name of a sequential or diverging [ColorBrewer](https://colorbrewer2.org/) palette, e.g. `--colors=YlGnBu` or `--colors=Spectral`.
+- `random` (the default), which picks a ColorBrewer palette.
+
+## Where wallpapers are stored
+
+- Windows: `%LOCALAPPDATA%\wallangle`
+- macOS: `~/Library/Application Support/wallangle`
+
+Each run writes new files and removes the previous run's files. On macOS, the wallpaper is set for the current Space on each display.
 
 ## Libraries Used
 
-- [Trianglify](https://github.com/qrohlf/trianglify)
-- [wallpaper](https://github.com/sindresorhus/wallpaper)
-- [minimist](https://github.com/substack/minimist)
+- [delaunator](https://github.com/mapbox/delaunator) for triangulation
+- [chroma.js](https://github.com/gka/chroma.js) for colour scales and ColorBrewer palettes
+
+Inspired by the awesome [Trianglify](https://github.com/qrohlf/trianglify).

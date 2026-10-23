@@ -1,42 +1,82 @@
 #!/usr/bin/env node
 
-import parseArgs from 'minimist';
-import Trianglify from 'trianglify';
-import wallpaper from 'wallpaper';
-import fs from 'fs';
+import { mkdir, readdir, rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { generate, pickPalette } from './lib/generate.mjs';
+import { USAGE, UsageError, parseOptions } from './lib/options.mjs';
+import { encodePng } from './lib/png.mjs';
+import { createRandom, randomSeed } from './lib/random.mjs';
+import { loadPlatform } from './lib/wallpaper/index.mjs';
 
-(async () => {
-	const parsedArgs = parseArgs(process.argv.slice(2));
+const FILE_PATTERN = /^wallangle-.*\.png$/;
 
-	const screenWidth = parsedArgs.width ?? 3840;
-	const screenHeight = parsedArgs.height ?? 2160;
-	const variance = parsedArgs.variance ?? Math.random();
-	const cellSize = parsedArgs.cellSize ?? Math.floor(Math.random() * 200 + 40);
-	const seed = parsedArgs.seed ?? null;
-	const colors = parsedArgs.colors?.split(',') ?? 'random';
+async function main(args) {
+	const options = parseOptions(args);
+	if (options.help) {
+		console.log(USAGE);
+		return;
+	}
 
-	const pngURI = Trianglify({
-		width: screenWidth,
-		height: screenHeight,
-		cell_size: cellSize,
-		x_colors: colors,
-		y_colors: 'match_x',
-		variance,
-		seed,
-	}).png();
+	const platform = await loadPlatform();
+	const monitors = await platform.listMonitors();
+	if (monitors.length === 0) {
+		throw new Error('No monitors were found.');
+	}
 
-	const data = pngURI.substr(pngURI.indexOf('base64') + 7);
+	const seed = options.seed ?? randomSeed();
+	await mkdir(platform.directory, { recursive: true });
+	// macOS and Windows cache wallpapers by path, so every run needs fresh file names.
+	const stamp = Date.now();
 
-	const buffer = new Buffer.from(data, 'base64');
+	const assignments = [];
+	const summaries = [];
+	for (const [index, monitor] of monitors.entries()) {
+		const monitorSeed = index === 0 ? seed : `${seed}:${index}`;
+		// Separate streams keep the point layout stable when only --variance, --cellSize or --colors change.
+		const pickParam = createRandom(`${monitorSeed}:params`);
+		const width = options.width ?? monitor.width;
+		const height = options.height ?? monitor.height;
+		const variance = options.variance ?? pickParam();
+		const cellSize = options.cellSize ?? Math.floor(pickParam() * 200 + 40);
+		const palette = options.palette ?? pickPalette(pickParam);
 
-	const wallpaperFileName = 'wallpaper.png';
+		const image = generate({
+			width,
+			height,
+			cellSize,
+			variance,
+			colors: palette.colors,
+			random: createRandom(`${monitorSeed}:points`),
+		});
 
-	fs.writeFile(wallpaperFileName, buffer, async () => {
-		await wallpaper.set(wallpaperFileName);
-		console.log(
-			`Wallpaper generated & set with screenWidth: ${screenWidth}, screenHeight: ${screenHeight}, variance: ${variance}, cellSize: ${cellSize}, seed: ${seed} & colors: ${
-				Array.isArray(colors) ? colors.join(',') : colors
-			}.`
+		const path = join(platform.directory, `wallangle-${stamp}-${index}.png`);
+		await writeFile(path, encodePng(image));
+		assignments.push({ id: monitor.id, path });
+		summaries.push(
+			`  Monitor ${index + 1}: ${width}x${height}, variance ${variance.toFixed(3)}, cellSize ${cellSize}, colors ${palette.name}`
 		);
-	});
-})();
+	}
+
+	await platform.setWallpapers(assignments);
+
+	const current = new Set(assignments.map(({ path }) => path));
+	for (const file of await readdir(platform.directory)) {
+		const path = join(platform.directory, file);
+		if (FILE_PATTERN.test(file) && !current.has(path)) {
+			await rm(path, { force: true });
+		}
+	}
+
+	console.log(`Wallpaper generated & set with seed ${seed}:\n${summaries.join('\n')}`);
+	console.log(`Run again with --seed=${seed} to recreate it.`);
+}
+
+main(process.argv.slice(2)).catch((error) => {
+	if (error instanceof UsageError) {
+		console.error(`${error.message}\n\n${USAGE}`);
+		process.exitCode = 2;
+	} else {
+		console.error(`wallangle: ${error.message}`);
+		process.exitCode = 1;
+	}
+});
