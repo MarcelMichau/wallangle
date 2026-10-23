@@ -47,3 +47,21 @@ jobs:
       - run: npm ci
       - name: List monitors
         run: node --input-type=module -e "const p = await (await import('./lib/wallpaper/index.mjs')).loadPlatform(); console.log(await p.listMonitors());"
+
+  old-node:
+    # npx installs despite engines.node, so an unsupported Node must get a readable error.
+    name: Readable error on unsupported Node
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Run the CLI
+        run: |
+          if output="$(node cli.mjs --help 2>&1)"; then
+            echo "::error::Expected a non-zero exit code on Node $(node -v)"
+            exit 1
+          fi
+          echo "$output"
+          grep -q "wallangle needs Node.js" <<< "$output"
