@@ -69,7 +69,7 @@ One of:
 - Windows: `%LOCALAPPDATA%\wallangle`
 - macOS: `~/Library/Application Support/wallangle`
 
-Each run writes new files and removes the previous run's files. On macOS, the wallpaper is set for the current Space on each display.
+Each run writes new files. Wallpapers from the 10 most recent runs are kept, older ones are removed. On macOS, the wallpaper is set for the current Space on each display.
 
 ## Libraries Used
 
